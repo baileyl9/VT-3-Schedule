@@ -1,56 +1,106 @@
 
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
+from pathlib import Path
+import socket
+import ssl
+import tempfile
 
-import requests
 import certifi
+import requests
+from cryptography import x509
+from cryptography.x509.oid import AuthorityInformationAccessOID
+from cryptography.hazmat.primitives.serialization import pkcs7
 
-# CNATRA VT-3 schedule location
-BASE = "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/"
+HOST = "www.cnatra.navy.mil"
+BASE = f"https://{HOST}/scheds/TW5/SQ-VT-3/"
 
-# Get tomorrow's date in Central Time
+def get_intermediate():
+    # Retrieve the server's public certificate.
+    context = ssl._create_unverified_context()
+    with socket.create_connection((HOST, 443), timeout=20) as sock:
+        with context.wrap_socket(sock, server_hostname=HOST) as tls:
+            leaf_der = tls.getpeercert(binary_form=True)
+
+    leaf = x509.load_der_x509_certificate(leaf_der)
+    aia = leaf.extensions.get_extension_for_class(
+        x509.AuthorityInformationAccess
+    ).value
+
+    urls = [
+        entry.access_location.value
+        for entry in aia
+        if entry.access_method ==
+        AuthorityInformationAccessOID.CA_ISSUERS
+    ]
+
+    for url in urls:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            continue
+
+        print("Checking issuer certificate:", parsed.hostname)
+        try:
+            response = requests.get(url, timeout=20)
+            response.raise_for_status()
+            data = response.content
+
+            try:
+                certificates = [
+                    x509.load_der_x509_certificate(data)
+                ]
+            except ValueError:
+                try:
+                    certificates = [
+                        x509.load_pem_x509_certificate(data)
+                    ]
+                except ValueError:
+                    certificates = (
+                        pkcs7.load_der_pkcs7_certificates(data)
+                    )
+
+            for cert in certificates:
+                if cert.subject == leaf.issuer:
+                    print("Found matching issuer certificate")
+                    return cert.public_bytes(
+                        encoding=__import__(
+                            "cryptography.hazmat.primitives.serialization",
+                            fromlist=["Encoding"]
+                        ).Encoding.PEM
+                    )
+        except (requests.RequestException, ValueError) as error:
+            print("Issuer retrieval failed:", error)
+
+    raise RuntimeError("Could not retrieve matching issuer certificate")
+
 today = datetime.now(ZoneInfo("America/Chicago")).date()
 flight_date = today + timedelta(days=1)
 
-# Build the PDF URL
 filename = f"!{flight_date:%Y-%m-%d}!VT-3!Frontpage.pdf"
 url = BASE + quote(filename, safe="!")
 
-print(f"Checking VT-3 schedule for {flight_date}")
-print(f"URL: {url}")
+print("Checking VT-3 schedule:", flight_date)
 
-try:
-    response = requests.get(
-        url,
-        headers={
-            "User-Agent": "VT3ScheduleChecker/1.0"
-        },
-        timeout=30,
-        verify=certifi.where()
+with tempfile.TemporaryDirectory() as folder:
+    bundle = Path(folder) / "trusted.pem"
+
+    trusted_roots = Path(certifi.where()).read_bytes()
+    intermediate = get_intermediate()
+    bundle.write_bytes(
+        trusted_roots + b"\n" + intermediate
     )
 
+    response = requests.get(
+        url,
+        timeout=30,
+        verify=str(bundle)
+    )
     response.raise_for_status()
 
-    pdf = response.content
-
-    if not pdf.startswith(b"%PDF-"):
-        raise ValueError("Response is not a valid PDF")
+    if not response.content.startswith(b"%PDF-"):
+        raise ValueError("CNATRA did not return a PDF")
 
     print("SUCCESS: CNATRA PDF retrieved")
-    print(f"Filename: {filename}")
-    print(f"PDF size: {len(pdf)} bytes")
-
-except requests.exceptions.SSLError as e:
-    print("ERROR: SSL certificate verification failed.")
-    print("CNATRA may have an incomplete certificate chain.")
-    print(str(e))
-    raise
-
-except requests.exceptions.RequestException as e:
-    print(f"ERROR: Unable to retrieve schedule: {e}")
-    raise
-
-except ValueError as e:
-    print(f"ERROR: {e}")
-    raise
+    print("Filename:", filename)
+    print("PDF size:", len(response.content))
