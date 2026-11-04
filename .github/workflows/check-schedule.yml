@@ -12,6 +12,8 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -19,16 +21,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install requests
-        run: pip install requests certifi
-
-      - name: Diagnose CNATRA certificate
-        run: |
-          echo | openssl s_client \
-            -connect www.cnatra.navy.mil:443 \
-            -servername www.cnatra.navy.mil \
-            -showcerts 2>&1 | grep -E \
-            'subject=|issuer=|verify error|Verify return code'
+      - name: Install dependencies
+        run: pip install requests certifi cryptography
 
       - name: Check CNATRA PDF
         run: python fetch_schedule.py
