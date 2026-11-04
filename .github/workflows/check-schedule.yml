@@ -3,6 +3,13 @@ name: Check VT-3 Schedule
 
 on:
   workflow_dispatch:
+    inputs:
+      search_name:
+        description: "Name to search"
+        required: false
+        default: "Logan Bailey"
+        type: string
+
   schedule:
     - cron: '0 22 * * *'
 
@@ -14,6 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
+    env:
+      SEARCH_NAME: ${{ inputs.search_name || 'Logan Bailey' }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -22,7 +32,15 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install requests certifi cryptography
+        run: |
+          pip install requests certifi cryptography pdfplumber
 
-      - name: Check CNATRA PDF
+      - name: Download and parse schedule
         run: python fetch_schedule.py
+
+      - name: Save extracted results
+        uses: actions/upload-artifact@v4
+        with:
+          name: vt3-schedule-results
+          path: schedule_results.json
+          retention-days: 7
