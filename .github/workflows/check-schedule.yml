@@ -3,7 +3,6 @@ name: Check VT-3 Schedule
 on:
   schedule:
     - cron: "0 22 * * *"
-      timezone: "UTC"
   workflow_dispatch:
 
 permissions:
