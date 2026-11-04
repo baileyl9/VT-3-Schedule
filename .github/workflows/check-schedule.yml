@@ -1,3 +1,4 @@
+
 name: Check VT-3 Schedule
 
 on:
@@ -13,18 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
       - name: Install requests
-        run: pip install requests
-              - name: Diagnose CNATRA certificate
+        run: pip install requests certifi
+
+      - name: Diagnose CNATRA certificate
         run: |
           echo | openssl s_client \
             -connect www.cnatra.navy.mil:443 \
             -servername www.cnatra.navy.mil \
             -showcerts 2>&1 | grep -E \
             'subject=|issuer=|verify error|Verify return code'
+
       - name: Check CNATRA PDF
         run: python fetch_schedule.py
-        
