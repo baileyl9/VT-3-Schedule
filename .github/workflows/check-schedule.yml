@@ -1,9 +1,9 @@
 name: Check VT-3 Schedule
 
 on:
-  schedule:
-    - cron: "0 22 * * *"
   workflow_dispatch:
+  schedule:
+    - cron: '0 22 * * *'
 
 permissions:
   contents: read
@@ -11,13 +11,13 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
       - name: Install requests
         run: pip install requests
       - name: Check CNATRA PDF
         run: python fetch_schedule.py
+        
