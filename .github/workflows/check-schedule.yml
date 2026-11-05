@@ -5,13 +5,18 @@ on:
   workflow_dispatch:
     inputs:
       search_name:
-        description: "Name to search"
+        description: "Person to search"
         required: false
         default: "Logan Bailey"
         type: string
+      schedule_date:
+        description: "Optional YYYY-MM-DD date (blank = tomorrow)"
+        required: false
+        default: ""
+        type: string
 
   schedule:
-    - cron: '0 22 * * *'
+    - cron: "0 22 * * *"
 
 permissions:
   contents: read
@@ -19,28 +24,33 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    env:
-      SEARCH_NAME: ${{ inputs.search_name || 'Logan Bailey' }}
+    timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
-          pip install requests certifi cryptography pdfplumber
+          python -m pip install --upgrade pip
+          python -m pip install requests certifi cryptography pdfplumber
 
       - name: Download and parse schedule
+        env:
+          SEARCH_NAME: ${{ inputs.search_name || 'Logan Bailey' }}
+          SCHEDULE_DATE: ${{ inputs.schedule_date || '' }}
         run: python fetch_schedule.py
 
-      - name: Save extracted results
+      - name: Save complete schedule
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: vt3-schedule-results
-          path: schedule_results.json
-          retention-days: 7
+          name: vt3-full-schedule
+          path: schedule_output/
+          if-no-files-found: warn
+          retention-days: 30
