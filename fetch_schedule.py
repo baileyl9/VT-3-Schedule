@@ -17,22 +17,25 @@ import pdfplumber
 import requests
 
 from cryptography import x509
-from cryptography.hazmat.primitives import serialization, pkcs7
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import pkcs7
 from cryptography.x509.oid import AuthorityInformationAccessOID
 
 
 HOST = "www.cnatra.navy.mil"
 BASE = f"https://{HOST}/scheds/TW5/SQ-VT-3/"
 
-# Default name, overridable from GitHub Actions
+# Default name for automatic searches.
+# Can be changed when manually running GitHub Actions.
 SEARCH_NAME = os.environ.get(
     "SEARCH_NAME", "Logan Bailey"
 ).strip()
 
 
 def get_intermediate():
-    # Only used to discover the issuer certificate.
-    # The actual PDF download verifies HTTPS.
+    # Retrieve the server certificate to locate
+    # its issuer. The PDF request itself uses
+    # verified HTTPS.
     context = ssl._create_unverified_context()
 
     with socket.create_connection(
