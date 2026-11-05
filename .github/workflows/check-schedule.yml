@@ -10,16 +10,30 @@ on:
         default: "Logan Bailey"
         type: string
       schedule_date:
-        description: "Optional YYYY-MM-DD date (blank = tomorrow)"
+        description: "Optional date YYYY-MM-DD"
         required: false
         default: ""
         type: string
+      force_check:
+        description: "Download again if already saved"
+        required: false
+        default: false
+        type: boolean
 
   schedule:
-    - cron: "0 22 * * *"
+    # 18:00-23:30 UTC Monday-Friday
+    - cron: "0,30 18-23 * * 1-5"
+
+    # 00:00-02:30 UTC Tuesday-Saturday
+    # Covers late afternoon/evening Central.
+    - cron: "0,30 0-2 * * 2-6"
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: vt3-schedule-monitor
+  cancel-in-progress: false
 
 jobs:
   check:
@@ -29,6 +43,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -40,17 +57,36 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install requests certifi cryptography pdfplumber
 
-      - name: Download and parse schedule
+      - name: Download and parse schedules
         env:
           SEARCH_NAME: ${{ inputs.search_name || 'Logan Bailey' }}
           SCHEDULE_DATE: ${{ inputs.schedule_date || '' }}
+          FORCE_CHECK: ${{ inputs.force_check || 'false' }}
         run: python fetch_schedule.py
 
-      - name: Save complete schedule
+      - name: Save schedule files in repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [ -d schedules ]; then
+            git add schedules/
+
+            if ! git diff --cached --quiet; then
+              git commit -m "Update VT-3 schedules"
+              git push origin HEAD:main
+            else
+              echo "No new schedule files to save"
+            fi
+          else
+            echo "No schedule files available"
+          fi
+
+      - name: Upload schedule artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: vt3-full-schedule
-          path: schedule_output/
-          if-no-files-found: warn
+          name: vt3-schedules
+          path: schedules/
+          if-no-files-found: ignore
           retention-days: 30
