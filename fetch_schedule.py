@@ -14,25 +14,32 @@ from zoneinfo import ZoneInfo
 import certifi
 import pdfplumber
 import requests
-
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import pkcs7
 from cryptography.x509.oid import AuthorityInformationAccessOID
 
-
 HOST = "www.cnatra.navy.mil"
 BASE = f"https://{HOST}/scheds/TW5/SQ-VT-3/"
-TIMEZONE = ZoneInfo("America/Chicago")
+TZ = ZoneInfo("America/Chicago")
+OUTPUT = Path("schedules")
 DEFAULT_NAME = "Logan Bailey"
-SEARCH_NAME = os.getenv("SEARCH_NAME", DEFAULT_NAME).strip()
-SCHEDULE_DATE = os.getenv("SCHEDULE_DATE", "").strip()
-OUTPUT_DIR = Path("schedule_output")
+
+SEARCH_NAME = (
+    os.getenv("SEARCH_NAME") or DEFAULT_NAME
+).strip()
+
+DATE_OVERRIDE = os.getenv(
+    "SCHEDULE_DATE", ""
+).strip()
+
+FORCE_CHECK = (
+    os.getenv("FORCE_CHECK", "false").lower()
+    == "true"
+)
 
 
 def get_intermediate():
-    # Discover the missing issuer certificate.
-    # The actual PDF request still verifies TLS.
     context = ssl._create_unverified_context()
 
     with socket.create_connection(
@@ -41,9 +48,13 @@ def get_intermediate():
         with context.wrap_socket(
             sock, server_hostname=HOST
         ) as tls:
-            leaf_der = tls.getpeercert(binary_form=True)
+            leaf_der = tls.getpeercert(
+                binary_form=True
+            )
 
-    leaf = x509.load_der_x509_certificate(leaf_der)
+    leaf = x509.load_der_x509_certificate(
+        leaf_der
+    )
 
     aia = leaf.extensions.get_extension_for_class(
         x509.AuthorityInformationAccess
@@ -63,7 +74,9 @@ def get_intermediate():
             continue
 
         try:
-            response = requests.get(url, timeout=20)
+            response = requests.get(
+                url, timeout=20
+            )
             response.raise_for_status()
             data = response.content
 
@@ -78,12 +91,13 @@ def get_intermediate():
                     ]
                 except ValueError:
                     certs = (
-                        pkcs7.load_der_pkcs7_certificates(data)
+                        pkcs7.load_der_pkcs7_certificates(
+                            data
+                        )
                     )
 
             for cert in certs:
                 if cert.subject == leaf.issuer:
-                    print("Found matching issuer certificate")
                     return cert.public_bytes(
                         serialization.Encoding.PEM
                     )
@@ -92,35 +106,26 @@ def get_intermediate():
             continue
 
     raise RuntimeError(
-        "Unable to retrieve CNATRA issuer certificate"
+        "Unable to retrieve issuer certificate"
     )
 
 
-def download_pdf(url):
-    with tempfile.TemporaryDirectory() as folder:
-        bundle = Path(folder) / "trusted.pem"
+def build_trust_bundle(folder):
+    bundle = Path(folder) / "trusted.pem"
 
-        bundle.write_bytes(
-            Path(certifi.where()).read_bytes()
-            + b"\n"
-            + get_intermediate()
-        )
+    bundle.write_bytes(
+        Path(certifi.where()).read_bytes()
+        + b"\n"
+        + get_intermediate()
+    )
 
-        response = requests.get(
-            url, timeout=45, verify=str(bundle)
-        )
-        response.raise_for_status()
-
-        data = response.content
-
-        if not data.startswith(b"%PDF-"):
-            raise ValueError("CNATRA did not return a PDF")
-
-        return data
+    return bundle
 
 
-def normalize(text):
-    return re.sub(r"\s+", " ", str(text or "")).strip()
+def normalize(value):
+    return re.sub(
+        r"\s+", " ", str(value or "")
+    ).strip()
 
 
 def person_variations(name):
@@ -140,221 +145,242 @@ def person_variations(name):
     ]
 
 
-def contains_person(text, name):
+def matches_person(text, name):
     text = normalize(text).upper()
 
-    for variation in person_variations(name):
+    for variant in person_variations(name):
         pattern = (
             r"(?<![A-Z])"
-            + re.escape(variation)
+            + re.escape(variant)
             + r"(?![A-Z])"
         )
+
         if re.search(pattern, text):
             return True
 
     return False
 
 
-def detect_section(text, previous):
-    value = normalize(text).upper()
-
-    if "FLIGHT (FLY EVENT) SCHEDULE" in value:
-        return "flight"
-
-    if "SIMULATOR (SIM EVENT) SCHEDULE" in value:
-        return "simulator"
-
-    if value == "GROUND EVENTS":
-        return "ground"
-
-    if value == "MEETINGS":
-        return "meetings"
-
-    if value == "MIL DUTY":
-        return "military_duty"
-
-    if value == "SELECTION":
-        return "selection"
-
-    if value == "FLT STBY":
-        return "flight_standby"
-
-    if value == "EXAM":
-        return "exams"
-
-    if value == "CAI":
-        return "computer_assisted_instruction"
-
-    if value == "DUTY/WATCH":
-        return "duty_watch"
-
-    return previous
-
-
-def clean_table(table):
-    rows = []
-
-    for row in table:
-        if not row:
-            continue
-
-        cells = [
-            normalize(cell)
-            for cell in row
+def target_dates(now):
+    if DATE_OVERRIDE:
+        return [
+            datetime.strptime(
+                DATE_OVERRIDE, "%Y-%m-%d"
+            ).date()
         ]
 
-        if any(cells):
-            rows.append(cells)
+    # Monday through Thursday: tomorrow.
+    if now.weekday() in (0, 1, 2, 3):
+        return [
+            now.date() + timedelta(days=1)
+        ]
 
-    return rows
+    # Friday: Saturday, Sunday and Monday.
+    if now.weekday() == 4:
+        return [
+            now.date() + timedelta(days=days)
+            for days in (1, 2, 3)
+        ]
+
+    return []
 
 
-def extract_schedule(data):
+def within_check_window(now):
+    if DATE_OVERRIDE:
+        return True
+
+    if now.weekday() >= 5:
+        return False
+
+    minutes = now.hour * 60 + now.minute
+
+    return 13 * 60 <= minutes <= 20 * 60
+
+
+def extract_pdf(data):
     pages = []
     tables = []
     records = []
     full_text = []
-    current_section = "general"
 
     with pdfplumber.open(io.BytesIO(data)) as pdf:
-        for page_number, page in enumerate(pdf.pages, 1):
-            text = page.extract_text(
-                layout=False
-            ) or ""
+        for page_num, page in enumerate(
+            pdf.pages, 1
+        ):
+            text = page.extract_text() or ""
 
-            lines = text.splitlines()
+            pages.append({
+                "page": page_num,
+                "text": text
+            })
+
             full_text.append(
-                f"\n===== PAGE {page_number} =====\n{text}"
+                f"===== PAGE {page_num} =====\n{text}"
             )
 
-            page_info = {
-                "page": page_number,
-                "text": text,
-                "lines": []
-            }
+            for line_num, line in enumerate(
+                text.splitlines(), 1
+            ):
+                if normalize(line):
+                    records.append({
+                        "page": page_num,
+                        "line_number": line_num,
+                        "text": normalize(line)
+                    })
 
-            for line_number, line in enumerate(lines, 1):
-                current_section = detect_section(
-                    line, current_section
-                )
-
-                entry = {
-                    "page": page_number,
-                    "line_number": line_number,
-                    "section": current_section,
-                    "text": normalize(line)
-                }
-
-                page_info["lines"].append(entry)
-
-                if entry["text"]:
-                    records.append(entry)
-
-            pages.append(page_info)
-
-            # Preserve original table cells and row order.
-            for table_number, table in enumerate(
+            for table_num, table in enumerate(
                 page.extract_tables(), 1
             ):
-                rows = clean_table(table)
+                rows = []
 
-                if not rows:
-                    continue
+                for row in table:
+                    if not row:
+                        continue
 
-                table_record = {
-                    "page": page_number,
-                    "table_number": table_number,
-                    "rows": rows
-                }
+                    cells = [
+                        normalize(cell)
+                        for cell in row
+                    ]
 
-                tables.append(table_record)
+                    if any(cells):
+                        rows.append(cells)
+
+                if rows:
+                    tables.append({
+                        "page": page_num,
+                        "table_number": table_num,
+                        "rows": rows
+                    })
+
+    if not pages:
+        raise ValueError("PDF has no pages")
+
+    if not records:
+        raise ValueError(
+            "PDF contains no extractable text"
+        )
 
     return {
         "pages": pages,
         "tables": tables,
         "records": records,
-        "full_text": "\n".join(full_text)
+        "full_text": "\n\n".join(full_text)
     }
 
 
-def find_person(schedule, name):
+def search_schedule(schedule, name):
     matches = []
 
     for record in schedule["records"]:
-        if contains_person(record["text"], name):
+        if matches_person(record["text"], name):
             matches.append({
                 "source": "text",
                 **record
             })
 
     for table in schedule["tables"]:
-        rows = table["rows"]
-
-        for index, row in enumerate(rows):
+        for index, row in enumerate(
+            table["rows"], 1
+        ):
             if any(
-                contains_person(cell, name)
+                matches_person(cell, name)
                 for cell in row
             ):
                 matches.append({
                     "source": "table",
                     "page": table["page"],
                     "table_number": table["table_number"],
-                    "row_number": index + 1,
+                    "row_number": index,
                     "cells": row
                 })
 
     return matches
 
 
-def main():
-    now = datetime.now(TIMEZONE)
+def check_date(day, session, bundle, now):
+    date_string = day.isoformat()
+    folder = OUTPUT / date_string
+    status_file = folder / "status.json"
 
-    if SCHEDULE_DATE:
-        flight_date = datetime.strptime(
-            SCHEDULE_DATE, "%Y-%m-%d"
-        ).date()
-    else:
-        flight_date = (
-            now.date() + timedelta(days=1)
-        )
+    if (
+        not FORCE_CHECK
+        and status_file.exists()
+        and (folder / "full_schedule.json").exists()
+        and (folder / "original_schedule.pdf").exists()
+    ):
+        try:
+            old = json.loads(
+                status_file.read_text(
+                    encoding="utf-8"
+                )
+            )
+            if old.get("status") == "downloaded":
+                print(
+                    f"SKIPPED {date_string}: "
+                    "already downloaded"
+                )
+                return "already_downloaded"
+        except (OSError, ValueError):
+            pass
 
     filename = (
-        f"!{flight_date:%Y-%m-%d}"
-        "!VT-3!Frontpage.pdf"
+        f"!{date_string}!VT-3!Frontpage.pdf"
     )
 
     url = BASE + quote(filename, safe="!")
 
-    OUTPUT_DIR.mkdir(
-        parents=True, exist_ok=True
-    )
+    print(f"Checking {date_string}")
+    print(f"URL: {url}")
 
-    print("VT-3 FULL SCHEDULE EXTRACTION")
-    print("Date:", flight_date)
-    print("URL:", url)
-    print("Default search:", SEARCH_NAME)
+    try:
+        response = session.get(
+            url,
+            timeout=45,
+            verify=str(bundle)
+        )
 
-    pdf_bytes = download_pdf(url)
+        if response.status_code in (404, 410):
+            print(
+                f"NOT PUBLISHED: {date_string}"
+            )
+            return "not_published"
 
-    print(
-        "Downloaded PDF:",
-        len(pdf_bytes), "bytes"
-    )
+        response.raise_for_status()
+        data = response.content
 
-    schedule = extract_schedule(pdf_bytes)
+        if not data.startswith(b"%PDF-"):
+            print(
+                f"NOT READY: {date_string}, "
+                "response is not a PDF"
+            )
+            return "not_ready"
 
-    matches = find_person(
-        schedule, SEARCH_NAME
-    )
+        schedule = extract_pdf(data)
+
+    except (
+        requests.RequestException,
+        ValueError,
+        OSError,
+        Exception
+    ) as error:
+        # Do not record a successful download.
+        # A later run can retry.
+        print(
+            f"RETRY NEEDED: {date_string}: "
+            f"{type(error).__name__}: {error}"
+        )
+        return "retry_needed"
 
     metadata = {
         "squadron": "VT-3",
-        "schedule_date": str(flight_date),
+        "schedule_date": date_string,
         "source_url": url,
         "retrieved_at": now.isoformat(),
         "pages_read": len(schedule["pages"]),
         "table_count": len(schedule["tables"]),
-        "text_record_count": len(schedule["records"])
+        "text_record_count": len(
+            schedule["records"]
+        )
     }
 
     complete = {
@@ -364,51 +390,93 @@ def main():
         "records": schedule["records"]
     }
 
-    search_results = {
+    matches = search_schedule(
+        schedule, SEARCH_NAME
+    )
+
+    results = {
         "metadata": metadata,
         "search_name": SEARCH_NAME,
         "match_count": len(matches),
         "matches": matches
     }
 
-    (OUTPUT_DIR / "full_schedule.json").write_text(
+    folder.mkdir(
+        parents=True, exist_ok=True
+    )
+
+    (folder / "full_schedule.json").write_text(
         json.dumps(complete, indent=2),
         encoding="utf-8"
     )
 
-    (OUTPUT_DIR / "full_schedule.txt").write_text(
+    (folder / "full_schedule.txt").write_text(
         schedule["full_text"],
         encoding="utf-8"
     )
 
-    (OUTPUT_DIR / "schedule_results.json").write_text(
-        json.dumps(search_results, indent=2),
+    (folder / "schedule_results.json").write_text(
+        json.dumps(results, indent=2),
         encoding="utf-8"
     )
 
-    # Also retain the original PDF for verification.
-    (OUTPUT_DIR / "original_schedule.pdf").write_bytes(
-        pdf_bytes
+    (folder / "original_schedule.pdf").write_bytes(
+        data
     )
 
-    print("SUCCESS: Full schedule extracted")
-    print("Pages:", metadata["pages_read"])
-    print("Tables:", metadata["table_count"])
-    print("Text records:", metadata["text_record_count"])
-    print("Name matches:", len(matches))
-    print("Output folder:", OUTPUT_DIR)
+    status = {
+        "status": "downloaded",
+        **metadata
+    }
 
-    for match in matches:
-        if match["source"] == "text":
-            print(
-                f"Page {match['page']}: "
-                f"{match['text']}"
-            )
-        else:
-            print(
-                f"Page {match['page']} table row: "
-                + " | ".join(match["cells"])
-            )
+    status_file.write_text(
+        json.dumps(status, indent=2),
+        encoding="utf-8"
+    )
+
+    print(
+        f"DOWNLOADED: {date_string} "
+        f"({len(schedule['pages'])} pages, "
+        f"{len(matches)} name matches)"
+    )
+
+    return "downloaded"
+
+
+def main():
+    now = datetime.now(TZ)
+
+    print("VT-3 SCHEDULE MONITOR")
+    print("Local time:", now.isoformat())
+    print("Default search:", SEARCH_NAME)
+
+    if not within_check_window(now):
+        print(
+            "Outside 1300-2000 Central "
+            "weekday monitoring window"
+        )
+        return
+
+    dates = target_dates(now)
+
+    if not dates:
+        print("No dates to check today")
+        return
+
+    outcomes = {}
+
+    with tempfile.TemporaryDirectory() as temp:
+        bundle = build_trust_bundle(temp)
+
+        with requests.Session() as session:
+            for day in dates:
+                outcome = check_date(
+                    day, session, bundle, now
+                )
+                outcomes[day.isoformat()] = outcome
+
+    print("CHECK SUMMARY")
+    print(json.dumps(outcomes, indent=2))
 
 
 if __name__ == "__main__":
