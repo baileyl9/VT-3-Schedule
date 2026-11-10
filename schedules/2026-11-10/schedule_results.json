@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "squadron": "VT-3",
+    "schedule_date": "2026-11-10",
+    "source_url": "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/!2026-11-10!VT-3!Frontpage.pdf",
+    "retrieved_at": "2026-11-09T19:20:14.900200-06:00",
+    "pages_read": 7,
+    "table_count": 5,
+    "text_record_count": 777
+  },
+  "search_name": "Logan Bailey",
+  "match_count": 3,
+  "matches": [
+    {
+      "source": "text",
+      "page": 2,
+      "line_number": 7,
+      "text": "3 0531 0716 0852 BAILEY, LOGAN# SMITH, NATHAN# I4201 1.6/0.0 3X; CCX"
+    },
+    {
+      "source": "text",
+      "page": 2,
+      "line_number": 28,
+      "text": "19 0931 1116 1252 BAILEY, LOGAN# SMITH, NATHAN# I4202 1.6/0.0"
+    },
+    {
+      "source": "text",
+      "page": 3,
+      "line_number": 1,
+      "text": "34 1331 1516 1652 BAILEY, LOGAN# SMITH, NATHAN# I4203 1.6/0.0"
+    }
+  ]
+}
