@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "squadron": "VT-3",
+    "schedule_date": "2026-11-16",
+    "source_url": "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/!2026-11-16!VT-3!Frontpage.pdf",
+    "retrieved_at": "2026-11-13T17:23:47.018323-06:00",
+    "pages_read": 6,
+    "table_count": 5,
+    "text_record_count": 591
+  },
+  "search_name": "Logan Bailey",
+  "match_count": 4,
+  "matches": [
+    {
+      "source": "text",
+      "page": 1,
+      "line_number": 28,
+      "text": "CDO BAILEY, LOGAN# 1200 1201"
+    },
+    {
+      "source": "text",
+      "page": 2,
+      "line_number": 35,
+      "text": "28 1351 1536 1718 BAILEY, LOGAN# MCKNEW, THOMAS# FAM4601 1.7/0.0 2X; O/I; AERO/NCON ONLY"
+    },
+    {
+      "source": "text",
+      "page": 3,
+      "line_number": 4,
+      "text": "35 1751 1936 2118 BAILEY, LOGAN# MCKNEW, THOMAS# FAM4901 1.7/0.0"
+    },
+    {
+      "source": "table",
+      "page": 1,
+      "table_number": 2,
+      "row_number": 2,
+      "cells": [
+        "Day SDO WILSON, LUKE 0800 2000 Night SDO BROWN, COLLIN 2000 0800 AM FDO WHEELER, JOSHUA 0530 1330 PM FDO WESTFALL, CHAD 1430 2300 AM AFDO STEPHENS, SIDNEY 0630 1430 PM AFDO LANGE, JACK 1430 2300 QA Skeds/Duty OPS GIBBS, AARON 0700 1500 EVERGREEN AM RDO DAVIS, DYLAN 0800 1745 EVERGREEN AM WHEELS WHITEHEAD, ANDREW 0800 1745 CDO BAILEY, LOGAN# 1200 1201 WKDAY AM DUTY DRIVER CHANG, RYAN 0600 2000",
+        "",
+        "",
+        ""
+      ]
+    }
+  ]
+}
