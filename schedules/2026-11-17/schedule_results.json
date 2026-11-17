@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "squadron": "VT-3",
+    "schedule_date": "2026-11-17",
+    "source_url": "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/!2026-11-17!VT-3!Frontpage.pdf",
+    "retrieved_at": "2026-11-16T19:44:49.238564-06:00",
+    "pages_read": 6,
+    "table_count": 6,
+    "text_record_count": 724
+  },
+  "search_name": "Logan Bailey",
+  "match_count": 6,
+  "matches": [
+    {
+      "source": "text",
+      "page": 1,
+      "line_number": 29,
+      "text": "CDO BAILEY, LOGAN# 1200 1201"
+    },
+    {
+      "source": "text",
+      "page": 3,
+      "line_number": 6,
+      "text": "36 1405 1550 1726 BAILEY, LOGAN# ALMUTAIRI, FAISAL# N4101 1.6/0.0 2X; O/I"
+    },
+    {
+      "source": "text",
+      "page": 3,
+      "line_number": 15,
+      "text": "44 1805 1950 2132 BAILEY, LOGAN# ALMUTAIRI, FAISAL# FAM4601 1.7/0.0"
+    },
+    {
+      "source": "table",
+      "page": 1,
+      "table_number": 2,
+      "row_number": 2,
+      "cells": [
+        "Day SDO MARMON, MICHAEL 0800 2000 Night SDO WHITE, CLAYTON 2000 0800 AM FDO HUMPHREYS, MICHAEL 0630 1430 PM FDO SABATINO, RYAN 1430 2300 AM AFDO BASER, SAMUEL 0630 1430 PM AFDO BENSON, ROBERT 1430 2300 QA Skeds/Duty OPS GIBBS, AARON 0700 1500 EVERGREEN AM RDO HOFFMAN, RYAN 0800 1745 EVERGREEN AM WHEELS PREMZIC, JACK 0800 1745 CDO BAILEY, LOGAN# 1200 1201 WKDAY AM DUTY DRIVER RIVA, RAFAEL 0600 2000",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "source": "table",
+      "page": 6,
+      "table_number": 1,
+      "row_number": 7,
+      "cells": [
+        "ROSENBERG, 1 MCNICHOLS, S I4203 W",
+        "",
+        "",
+        "",
+        "",
+        "TOERNQVIST, 3 LIEGNELL, H M I4202",
+        "COASSIN, 2 WILLIAMS, C C4690(RPT) M",
+        "SAMMUT, 1 COASSIN, M I4201 C",
+        "ALMUTAIRI, 2 BAILEY, L F N4101",
+        "",
+        "NESTER, 2 WEATHERFORD, L I4204 R",
+        "HALE, 2 THOMAS, B I4201 W",
+        "SCHULTZ, 2 LOCHOWSKI, J FAM4601 A",
+        "NILSSON, 3 WIGGINS, R W",
+        "VOGET, 3 MILLER, O CS4290 B",
+        "FEDORSHAK, 3 STATES, R O CS4290",
+        "",
+        "y Line Hide 5th Go Show 5",
+        "",
+        ""
+      ]
+    },
+    {
+      "source": "table",
+      "page": 6,
+      "table_number": 1,
+      "row_number": 9,
+      "cells": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "TOERNQVIST, 3 LIEGNELL, H M I4203",
+        "",
+        "",
+        "ALMUTAIRI, 2 BAILEY, L F FAM4601",
+        "",
+        "NESTER, 2 WEATHERFORD, L I4301 R",
+        "HALE, 2 THOMAS, B I4202 W",
+        "SCHULTZ, 2 LOCHOWSKI, J FAM4901 A",
+        "",
+        "",
+        "",
+        "",
+        "2.8",
+        "Average Events Per Line",
+        ""
+      ]
+    }
+  ]
+}
