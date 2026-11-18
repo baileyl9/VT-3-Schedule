@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "squadron": "VT-3",
+    "schedule_date": "2026-11-18",
+    "source_url": "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/!2026-11-18!VT-3!Frontpage.pdf",
+    "retrieved_at": "2026-11-17T18:45:07.084280-06:00",
+    "pages_read": 7,
+    "table_count": 5,
+    "text_record_count": 721
+  },
+  "search_name": "Logan Bailey",
+  "match_count": 2,
+  "matches": [
+    {
+      "source": "text",
+      "page": 1,
+      "line_number": 30,
+      "text": "CDO BAILEY, LOGAN 1200 1201"
+    },
+    {
+      "source": "table",
+      "page": 1,
+      "table_number": 2,
+      "row_number": 2,
+      "cells": [
+        "Day SDO QUILES, JORDAN# 0700 1900 Night SDO TRENT, OWEN 1900 0700 AM FDO COZAD, DANIEL 0630 1430 PM FDO WESTFALL, CHAD 1430 2300 AM AFDO MEYER, CARSON# 0630 1430 PM AFDO LAFOREST, GUILLAUME# 1330 2200 QA Skeds/Duty OPS GIBBS, AARON 0600 1400 EVERGREEN AM RDO HAGEDORN, JOSHUA 0800 1745 EVERGREEN AM WHEELS VOCATURO, JOSEPH 0700 1645 CDO BAILEY, LOGAN 1200 1201 WKDAY AM DUTY DRIVER CORDNER, CHRISTOPHER# 0500 1900",
+        "",
+        "",
+        ""
+      ]
+    }
+  ]
+}
