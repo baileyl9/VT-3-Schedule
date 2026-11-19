@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "squadron": "VT-3",
+    "schedule_date": "2026-11-19",
+    "source_url": "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/!2026-11-19!VT-3!Frontpage.pdf",
+    "retrieved_at": "2026-11-18T18:02:48.710538-06:00",
+    "pages_read": 6,
+    "table_count": 5,
+    "text_record_count": 235
+  },
+  "search_name": "Logan Bailey",
+  "match_count": 5,
+  "matches": [
+    {
+      "source": "text",
+      "page": 1,
+      "line_number": 30,
+      "text": "CDO BAILEY, LOGAN# 1200 1201"
+    },
+    {
+      "source": "text",
+      "page": 2,
+      "line_number": 22,
+      "text": "16 0704 0849 1025 BAILEY, LOGAN# PORTER, JACOB FAM4204 1.6/0.0"
+    },
+    {
+      "source": "text",
+      "page": 2,
+      "line_number": 42,
+      "text": "33 1104 1249 1425 BAILEY, LOGAN# SCHNEIDER, ETHAN FAM4204 1.6/0.0"
+    },
+    {
+      "source": "text",
+      "page": 5,
+      "line_number": 14,
+      "text": "1400-1500 AIM VT-3 READY ROOM AHLSTRAND, EDWARD, BAILEY, LOGAN, BERRY, FLY OR BRIEF AROUND"
+    },
+    {
+      "source": "table",
+      "page": 1,
+      "table_number": 2,
+      "row_number": 2,
+      "cells": [
+        "Day SDO SCHULTZ, JACOB 0800 2000 Night SDO SUMMERS, KAMRON 2000 0800 AM FDO CRAWFORD, ALAN# 0630 1430 PM FDO HAGEDORN, JOSHUA# 1430 2300 AM AFDO BRYAN, JACOB 0630 1430 PM AFDO BELVIN, GREGORY 1430 2300 QA Skeds/Duty OPS HERATH, TYLER 0700 1500 EVERGREEN AM RDO WHEELER, JOSHUA 0800 1745 EVERGREEN AM WHEELS FOSTER, BRENT 0800 1745 CDO BAILEY, LOGAN# 1200 1201 WKDAY AM DUTY DRIVER MUTTO, JOSHUA 0600 2000",
+        "",
+        "",
+        ""
+      ]
+    }
+  ]
+}
