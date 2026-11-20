@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "squadron": "VT-3",
+    "schedule_date": "2026-11-20",
+    "source_url": "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/!2026-11-20!VT-3!Frontpage.pdf",
+    "retrieved_at": "2026-11-19T18:25:55.053258-06:00",
+    "pages_read": 6,
+    "table_count": 5,
+    "text_record_count": 244
+  },
+  "search_name": "Logan Bailey",
+  "match_count": 4,
+  "matches": [
+    {
+      "source": "text",
+      "page": 1,
+      "line_number": 29,
+      "text": "CDO BAILEY, LOGAN# 1200 1201"
+    },
+    {
+      "source": "text",
+      "page": 3,
+      "line_number": 11,
+      "text": "40 1433 1618 1800 BAILEY, LOGAN# TOERNQVIST, HANNES# I4301 1.7/0.0 2X; O/I"
+    },
+    {
+      "source": "text",
+      "page": 3,
+      "line_number": 17,
+      "text": "45 1833 2018 2200 BAILEY, LOGAN# TOERNQVIST, HANNES# I4302 1.7/0.0 5.3 NITE"
+    },
+    {
+      "source": "table",
+      "page": 1,
+      "table_number": 2,
+      "row_number": 2,
+      "cells": [
+        "Day SDO LOUGHRAN, AIDAN 0800 2000 Night SDO RICHARDSON, BRYAN 2000 0800 AM FDO WIGGINS, WILLIAM# 0530 1330 PM FDO HOFFMAN, RYAN 1430 2300 AM AFDO WALSH, JOHN 0630 1430 PM AFDO SUCHYTA, ROBERT 1430 2300 QA Skeds/Duty OPS DUBOIS, MARTIN 0700 1500 EVERGREEN AM RDO HOLT, JASON 0800 1745 EVERGREEN AM WHEELS TURNER, MALCOLM 0800 1745 CDO BAILEY, LOGAN# 1200 1201 WKDAY AM DUTY DRIVER SIMONSEN, CHRISTIAN 0600 2000",
+        "",
+        "",
+        ""
+      ]
+    }
+  ]
+}
