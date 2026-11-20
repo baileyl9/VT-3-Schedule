@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "squadron": "VT-3",
+    "schedule_date": "2026-11-22",
+    "source_url": "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/!2026-11-22!VT-3!Frontpage.pdf",
+    "retrieved_at": "2026-11-20T17:48:41.365611-06:00",
+    "pages_read": 3,
+    "table_count": 4,
+    "text_record_count": 194
+  },
+  "search_name": "Logan Bailey",
+  "match_count": 2,
+  "matches": [
+    {
+      "source": "text",
+      "page": 1,
+      "line_number": 20,
+      "text": "CDO BAILEY, LOGAN 1200 1201"
+    },
+    {
+      "source": "table",
+      "page": 1,
+      "table_number": 2,
+      "row_number": 2,
+      "cells": [
+        "Day SDO PUMA, ALFONSO 0800 2000 Night SDO LONG, COLE 2000 0800 WKEND AM DUTY DRIVER DOWNARD, COLBY 0600 2000 CDO BAILEY, LOGAN 1200 1201",
+        "",
+        "",
+        ""
+      ]
+    }
+  ]
+}

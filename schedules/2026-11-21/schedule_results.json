@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "squadron": "VT-3",
+    "schedule_date": "2026-11-21",
+    "source_url": "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/!2026-11-21!VT-3!Frontpage.pdf",
+    "retrieved_at": "2026-11-20T17:48:41.365611-06:00",
+    "pages_read": 5,
+    "table_count": 5,
+    "text_record_count": 221
+  },
+  "search_name": "Logan Bailey",
+  "match_count": 2,
+  "matches": [
+    {
+      "source": "text",
+      "page": 1,
+      "line_number": 25,
+      "text": "CDO BAILEY, LOGAN 1200 1201"
+    },
+    {
+      "source": "table",
+      "page": 1,
+      "table_number": 2,
+      "row_number": 2,
+      "cells": [
+        "Day SDO KIM, DANIEL 0800 2000 Night SDO BEATTIE, SAMUEL 2000 0800 AM FDO COZAD, DANIEL 0730 1530 AM AFDO TEAGUE, JASON 0730 1530 BREWTON RDO AM HOFFMAN, RYAN 0800 1500 BREWTON AM WHEELS SEARS, PARIS 0800 1500 WKEND AM DUTY DRIVER WATKINS, SONNY 0600 2000 CDO BAILEY, LOGAN 1200 1201",
+        "",
+        "",
+        ""
+      ]
+    }
+  ]
+}
