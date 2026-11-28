@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "squadron": "VT-3",
+    "schedule_date": "2026-11-30",
+    "source_url": "https://www.cnatra.navy.mil/scheds/TW5/SQ-VT-3/!2026-11-30!VT-3!Frontpage.pdf",
+    "retrieved_at": "2026-11-27T19:15:11.767549-06:00",
+    "pages_read": 7,
+    "table_count": 5,
+    "text_record_count": 269
+  },
+  "search_name": "Logan Bailey",
+  "match_count": 2,
+  "matches": [
+    {
+      "source": "text",
+      "page": 3,
+      "line_number": 6,
+      "text": "38 1351 1536 1712 BAILEY, LOGAN# HOUSTON, BROCK# N4101 1.6/0.0 2X; O/I"
+    },
+    {
+      "source": "text",
+      "page": 3,
+      "line_number": 18,
+      "text": "49 1751 1936 2118 BAILEY, LOGAN# HOUSTON, BROCK# FAM4601 1.7/0.0"
+    }
+  ]
+}
